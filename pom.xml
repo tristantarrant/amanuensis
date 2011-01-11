@@ -17,14 +17,31 @@
 		<version.slf4j>1.6.1</version.slf4j>
 	</properties>
 	
+	<contributors>
+		<contributor>
+			<name>Tristan Tarrant</name>
+			<email>tristan.tarrant@dataforte.net</email>
+			<organization>Dataforte</organization>
+			<organizationUrl>http://www.dataforte.net</organizationUrl>
+		</contributor>
+	</contributors>
+	
+	<distributionManagement>
+		<site>
+			<id>ftp.dataforte.net</id>
+			<name>Dataforte site</name>
+			<url>ftp://ftp.dataforte.net/www.dataforte.net/software/${project.artifactId}</url>
+		</site>
+	</distributionManagement>
+	
 	<scm>
-		<connection>scm:git:http://github.com/tristantarrant/infinispan-index-writer.git</connection>
-		<developerConnection>scm:git:ssh://git@github.com/tristantarrant/infinispan-index-writer.git</developerConnection>
-		<url>http://github.com/tristantarrant/infinispan-index-writer</url>
+		<connection>scm:git:http://github.com/tristantarrant/amanuensis.git</connection>
+		<developerConnection>scm:git:ssh://git@github.com/tristantarrant/amanuensis.git</developerConnection>
+		<url>http://github.com/tristantarrant/amanuensis</url>
 	</scm>
 
 	<issueManagement>
-		<url>http://github.com/tristantarrant/infinispan-index-writer/issues</url>
+		<url>http://github.com/tristantarrant/amanuensis/issues</url>
 	</issueManagement>
 	
 	<dependencies>
@@ -51,7 +68,7 @@
 		<dependency>
 			<groupId>net.dataforte</groupId>
 			<artifactId>dataforte-commons</artifactId>
-			<version>0.0.4</version>
+			<version>0.0.5</version>
 		</dependency>
 	</dependencies>
 </project>
