@@ -1,0 +1,7 @@
+Amanuensis
+
+	Amanuensis is a clustered IndexWriter implementation for writing to Infinispan Lucene Directories. It overcomes the limitation that only 
+	a single IndexWriter may be open at any one time on a Lucene Directory by leveraging the underlying JGroups channels used by Infinispan
+	and streaming changes from slave nodes to a master node.
+	        
+    []

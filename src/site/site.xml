@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project xmlns="http://maven.apache.org/DECORATION/1.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/DECORATION/1.0.0 http://maven.apache.org/xsd/decoration-1.0.0.xsd"
+	name="amanuensis">
+
+	<skin>
+		<groupId>net.dataforte.maven.skins</groupId>
+		<artifactId>dataforte-skin</artifactId>
+		<version>2</version>
+	</skin>
+
+	<bannerLeft>
+		<name>Amanuensis</name>
+	</bannerLeft>
+
+	<bannerRight>
+		<src>images/logo.png</src>
+	</bannerRight>
+
+	<body>
+
+		<menu name="Amanuensis">
+			<item name="Introduction" href="index.html" />
+		</menu>
+
+		<menu name="Information" ref="reports" />
+	</body>
+</project>
