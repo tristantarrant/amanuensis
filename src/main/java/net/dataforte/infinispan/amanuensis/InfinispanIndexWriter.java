@@ -16,8 +16,7 @@ public class InfinispanIndexWriter {
 
 	private AmanuensisManager manager;
 	private String indexName;
-	private boolean batching;
-	private IndexOperations batchOps;
+	private ThreadLocal<IndexOperations> batchOps;
 
 	private InfinispanDirectory directory;
 
@@ -25,47 +24,100 @@ public class InfinispanIndexWriter {
 		this.manager = manager;
 		this.indexName = directory.getIndexName();
 		this.directory = directory;
+		this.batchOps = new ThreadLocal<IndexOperations>();
 	}
 
 	public String getIndexName() {
 		return indexName;
 	}
-	
+
 	public InfinispanDirectory getDirectory() {
 		return directory;
 	}
 
 	// IndexWriter methods
 
-	public synchronized void startBatch() {
-		if (batching) {
+	public boolean isBatching() {
+		return batchOps.get() != null;
+	}
+
+	/**
+	 * Put this InfinispanIndexWriter in batch mode: all operations will be
+	 * queued and sent when the {@link InfinispanIndexWriter#endBatch} method is
+	 * invoked. Note that the batches are local to the current thread, therefore
+	 * each thread may start and end a batch indipendently from the others.
+	 * 
+	 * @see InfinispanIndexWriter#endBatch()
+	 * @see InfinispanIndexWriter#cancelBatch()
+	 */
+	public void startBatch() {
+		if (isBatching()) {
 			throw new IllegalStateException("Already in batching mode");
 		} else {
-			batchOps = new IndexOperations(this.indexName);
-			batching = true;
-			if(log.isDebugEnabled()) {
-				log.debug("Batching started for index "+indexName);
+			batchOps.set(new IndexOperations(this.indexName));
+
+			if (log.isDebugEnabled()) {
+				log.debug("Batching started for index " + indexName);
 			}
 		}
 	}
 
-	public synchronized void endBatch() throws IndexerException {
-		if (!batching) {
+	/**
+	 * Send all changes in the current batch, started by
+	 * {@link InfinispanIndexWriter#startBatch()} to the master node for
+	 * indexing
+	 * 
+	 * @throws IndexerException
+	 * 
+	 * @see InfinispanIndexWriter#startBatch()
+	 * @see InfinispanIndexWriter#cancelBatch()
+	 */
+	public void endBatch() throws IndexerException {
+		if (!isBatching()) {
 			throw new IllegalStateException("Not in batching mode");
 		} else {
-			batching = false;
-			manager.dispatchOperations(batchOps);
-			batchOps = null;
-			if(log.isDebugEnabled()) {
-				log.debug("Batching finished for index "+indexName);
+			manager.dispatchOperations(batchOps.get());
+			batchOps.remove();
+			if (log.isDebugEnabled()) {
+				log.debug("Batching finished for index " + indexName);
 			}
 		}
 	}
 
+	/**
+	 * Cancels the current batch: all queued changes will be reset and not sent
+	 * to the master
+	 * 
+	 * @see InfinispanIndexWriter#startBatch()
+	 * @see InfinispanIndexWriter#endBatch()
+	 */
+	public void cancelBatch() {
+		if (!isBatching()) {
+			throw new IllegalStateException("Not in batching mode");
+		} else {
+			batchOps.remove();
+			if (log.isDebugEnabled()) {
+				log.debug("Batching cancelled for index " + indexName);
+			}
+		}
+	}
+
+	/**
+	 * Adds a single {@link Document} to the index
+	 * 
+	 * @param doc
+	 * @throws IndexerException
+	 */
 	public void addDocument(Document doc) throws IndexerException {
 		dispatch(new AddDocumentOperation(doc));
 	}
 
+	/**
+	 * Adds multiple {@link Document} to the index
+	 * 
+	 * @param docs
+	 * @throws IndexerException
+	 */
 	public void addDocuments(Document... docs) throws IndexerException {
 		if (docs.length == 0) {
 			return;
@@ -77,6 +129,13 @@ public class InfinispanIndexWriter {
 		dispatch(ops);
 	}
 
+	/**
+	 * Deletes all documents from the index which match the given array of
+	 * {@link Query}
+	 * 
+	 * @param queries
+	 * @throws IndexerException
+	 */
 	public void deleteDocuments(Query... queries) throws IndexerException {
 		if (queries.length == 0) {
 			return;
@@ -88,6 +147,13 @@ public class InfinispanIndexWriter {
 		dispatch(ops);
 	}
 
+	/**
+	 * Deletes all documents from the index which match the given array of
+	 * {@link Term}
+	 * 
+	 * @param queries
+	 * @throws IndexerException
+	 */
 	public void deleteDocuments(Term... terms) throws IndexerException {
 		if (terms.length == 0) {
 			return;
@@ -101,8 +167,8 @@ public class InfinispanIndexWriter {
 
 	// INTERNAL METHODS
 	private void dispatch(IndexOperation... ops) throws IndexerException {
-		if (batching) {
-			batchOps.addOperations(ops);
+		if (isBatching()) {
+			batchOps.get().addOperations(ops);
 		} else {
 			manager.dispatchOperations(new IndexOperations(this.indexName, ops));
 		}

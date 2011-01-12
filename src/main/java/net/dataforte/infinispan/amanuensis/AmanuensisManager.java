@@ -1,6 +1,5 @@
 package net.dataforte.infinispan.amanuensis;
 
-import java.awt.Component;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
@@ -14,12 +13,22 @@ import net.dataforte.infinispan.amanuensis.backend.lucene.LuceneOperationDispatc
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.SimpleAnalyzer;
+import org.apache.lucene.index.IndexWriter;
 import org.infinispan.lifecycle.ComponentStatus;
 import org.infinispan.lucene.InfinispanDirectory;
 import org.infinispan.manager.EmbeddedCacheManager;
 import org.infinispan.remoting.transport.Address;
 import org.slf4j.Logger;
 
+/**
+ * AmanuensisManager is the entry point for obtaining {@link InfinispanIndexWriter} instances.
+ * It handles synchronization between the nodes and matching between the writers and their
+ * respective {@link InfinispanDirectory} instances. There should be only one instance of
+ * AmanuensisManager for each {@link EmbeddedCacheManager}.
+ * 
+ * @author Tristan Tarrant
+ *
+ */
 public class AmanuensisManager {
 	private static final Logger log = LoggerFactory.make();
 	private static final short INFINISPAN_INDEX_WRITER_SCOPE_ID = 1234;
@@ -53,10 +62,19 @@ public class AmanuensisManager {
 		return analyzer;
 	}
 
+	/**
+	 * Sets the {@link Analyzer} which will be used by the {@link IndexWriter}
+	 *  
+	 * @param analyzer
+	 */
 	public void setAnalyzer(Analyzer analyzer) {
 		this.analyzer = analyzer;
 	}
 
+	/**
+	 * Stops this instance from receiving/sending indexing jobs to other nodes.
+	 * Should only be invoked just before stopping the underlying {@link EmbeddedCacheManager}
+	 */
 	public void close() {
 		this.remoteOperationProcessor.close();
 	}
@@ -81,14 +99,29 @@ public class AmanuensisManager {
 		}
 	}
 
+	/**
+	 * Returns the {@link InfinispanDirectory} for the specified indexName
+	 * 
+	 * @param indexName
+	 * @return
+	 */
 	public InfinispanDirectory getDirectoryByIndexName(String indexName) {
 		return directoryMap.get(indexName);
 	}
 
+	/**
+	 * Returns the cluster's {@link Address} of the master
+	 * @return
+	 */
 	public Address getMasterAddress() {
 		return cacheManager.getCoordinator();
 	}
 
+	/**
+	 * Returns the cluster's {@link Address} of the local node
+	 * 
+	 * @return
+	 */
 	public Address getLocalAddress() {
 		return cacheManager.getAddress();
 	}
