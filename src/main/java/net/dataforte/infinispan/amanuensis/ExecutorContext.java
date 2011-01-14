@@ -38,6 +38,12 @@ import org.apache.lucene.index.IndexWriter;
 import org.infinispan.lucene.InfinispanDirectory;
 import org.slf4j.Logger;
 
+/**
+ * The ExecutorContext contains all of the state associated with an executor.
+ * 
+ * @author Tristan Tarrant
+ * 
+ */
 public class ExecutorContext {
 	private static final Logger log = LoggerFactory.make();
 	private static final String THREAD_GROUP_PREFIX = "Amanuensis: ";
@@ -118,6 +124,12 @@ public class ExecutorContext {
 		}
 	}
 
+	/**
+	 * Provide an implementation of {@link ThreadFactory} which gives sensible names to threads
+	 * 
+	 * @author Tristan Tarrant
+	 * @author Sanne Grinovero
+	 */
 	private static class ExecutorThreadFactory implements ThreadFactory {
 
 		final ThreadGroup group;
@@ -137,6 +149,12 @@ public class ExecutorContext {
 
 	}
 
+	/**
+	 * Provide an implementation of {@link RejectedExecutionHandler} which queues up threads
+	 * 
+	 * @author Tristan Tarrant
+	 * @author Sanne Grinovero
+	 */
 	public static class BlockingPolicy implements RejectedExecutionHandler {
 		public BlockingPolicy() {
 		}

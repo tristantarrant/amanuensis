@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<artifactId>dataforte-parent</artifactId>
@@ -9,13 +10,13 @@
 	<artifactId>amanuensis</artifactId>
 	<version>0.0.3-SNAPSHOT</version>
 	<name>Infinispan Amanuensis Lucene Indexer</name>
-	
+
 	<properties>
 		<version.lucene>3.0.3</version.lucene>
 		<version.infinispan>4.2.0.FINAL</version.infinispan>
 		<version.slf4j>1.6.1</version.slf4j>
 	</properties>
-	
+
 	<contributors>
 		<contributor>
 			<name>Tristan Tarrant</name>
@@ -24,7 +25,14 @@
 			<organizationUrl>http://www.dataforte.net</organizationUrl>
 		</contributor>
 	</contributors>
-	
+
+	<licenses>
+		<license>
+			<name>LGPL 2</name>
+			<url>http://www.gnu.org/licenses/lgpl-2.1.txt</url>			
+		</license>
+	</licenses>
+
 	<distributionManagement>
 		<site>
 			<id>ftp.dataforte.net</id>
@@ -32,7 +40,7 @@
 			<url>ftp://ftp.dataforte.net/www.dataforte.net/software/${project.artifactId}</url>
 		</site>
 	</distributionManagement>
-	
+
 	<scm>
 		<connection>scm:git:http://github.com/tristantarrant/amanuensis.git</connection>
 		<developerConnection>scm:git:ssh://git@github.com/tristantarrant/amanuensis.git</developerConnection>
@@ -42,7 +50,7 @@
 	<issueManagement>
 		<url>http://github.com/tristantarrant/amanuensis/issues</url>
 	</issueManagement>
-	
+
 	<dependencies>
 		<dependency>
 			<groupId>org.infinispan</groupId>
