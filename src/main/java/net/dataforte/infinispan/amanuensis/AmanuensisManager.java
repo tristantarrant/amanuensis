@@ -69,6 +69,9 @@ public class AmanuensisManager {
 	 * @param cacheManager
 	 */
 	public AmanuensisManager(EmbeddedCacheManager cacheManager) {
+		if (cacheManager==null) {
+			throw new IllegalArgumentException("cacheManager cannot be null");
+		}
 		if (cacheManager.getStatus()!=ComponentStatus.RUNNING) {
 			throw new IllegalStateException("Cache is not running");
 		}
@@ -89,6 +92,9 @@ public class AmanuensisManager {
 	 * @param analyzer
 	 */
 	public void setAnalyzer(Analyzer analyzer) {
+		if (analyzer==null) {
+			throw new IllegalArgumentException("analyzer cannot be null");
+		}
 		this.analyzer = analyzer;
 	}
 
@@ -108,6 +114,9 @@ public class AmanuensisManager {
 	 * @return
 	 */
 	public InfinispanIndexWriter getIndexWriter(InfinispanDirectory directory) throws IndexerException {
+		if (directory==null) {
+			throw new IllegalArgumentException("directory cannot be null");
+		}
 		if (directory.getIndexName() == null) {
 			throw new IndexerException("InfinispanDirectory must not have a null indexName");
 		}
