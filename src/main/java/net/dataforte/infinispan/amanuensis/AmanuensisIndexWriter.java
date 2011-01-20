@@ -29,30 +29,30 @@ import net.dataforte.infinispan.amanuensis.ops.DeleteDocumentsTermsOperation;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.Query;
-import org.infinispan.lucene.InfinispanDirectory;
+import org.apache.lucene.store.Directory;
 import org.slf4j.Logger;
 
-public class InfinispanIndexWriter {
+public class AmanuensisIndexWriter {
 	private static final Logger log = LoggerFactory.make();
 
 	private AmanuensisManager manager;
-	private String indexName;
+	private String directoryId;
 	private ThreadLocal<IndexOperations> batchOps;
 
-	private InfinispanDirectory directory;
+	private Directory directory;
 
-	public InfinispanIndexWriter(AmanuensisManager manager, InfinispanDirectory directory) {
+	public AmanuensisIndexWriter(AmanuensisManager manager, Directory directory) throws IndexerException {
 		this.manager = manager;
-		this.indexName = directory.getIndexName();
+		this.directoryId = manager.getUniqueDirectoryIdentifier(directory);
 		this.directory = directory;
 		this.batchOps = new ThreadLocal<IndexOperations>();
 	}
 
-	public String getIndexName() {
-		return indexName;
+	public String getDirectoryId() {
+		return directoryId;
 	}
 
-	public InfinispanDirectory getDirectory() {
+	public Directory getDirectory() {
 		return directory;
 	}
 
@@ -64,34 +64,34 @@ public class InfinispanIndexWriter {
 
 	/**
 	 * Put this InfinispanIndexWriter in batch mode: all operations will be
-	 * queued and sent when the {@link InfinispanIndexWriter#endBatch} method is
+	 * queued and sent when the {@link AmanuensisIndexWriter#endBatch} method is
 	 * invoked. Note that the batches are local to the current thread, therefore
 	 * each thread may start and end a batch indipendently from the others.
 	 * 
-	 * @see InfinispanIndexWriter#endBatch()
-	 * @see InfinispanIndexWriter#cancelBatch()
+	 * @see AmanuensisIndexWriter#endBatch()
+	 * @see AmanuensisIndexWriter#cancelBatch()
 	 */
 	public void startBatch() {
 		if (isBatching()) {
 			throw new IllegalStateException("Already in batching mode");
 		} else {
-			batchOps.set(new IndexOperations(this.indexName));
+			batchOps.set(new IndexOperations(this.directoryId));
 
 			if (log.isDebugEnabled()) {
-				log.debug("Batching started for index " + indexName);
+				log.debug("Batching started for index " + directoryId);
 			}
 		}
 	}
 
 	/**
 	 * Send all changes in the current batch, started by
-	 * {@link InfinispanIndexWriter#startBatch()} to the master node for
+	 * {@link AmanuensisIndexWriter#startBatch()} to the master node for
 	 * indexing
 	 * 
 	 * @throws IndexerException
 	 * 
-	 * @see InfinispanIndexWriter#startBatch()
-	 * @see InfinispanIndexWriter#cancelBatch()
+	 * @see AmanuensisIndexWriter#startBatch()
+	 * @see AmanuensisIndexWriter#cancelBatch()
 	 */
 	public void endBatch() throws IndexerException {
 		if (!isBatching()) {
@@ -100,7 +100,7 @@ public class InfinispanIndexWriter {
 			manager.dispatchOperations(batchOps.get());
 			batchOps.remove();
 			if (log.isDebugEnabled()) {
-				log.debug("Batching finished for index " + indexName);
+				log.debug("Batching finished for index " + directoryId);
 			}
 		}
 	}
@@ -109,8 +109,8 @@ public class InfinispanIndexWriter {
 	 * Cancels the current batch: all queued changes will be reset and not sent
 	 * to the master
 	 * 
-	 * @see InfinispanIndexWriter#startBatch()
-	 * @see InfinispanIndexWriter#endBatch()
+	 * @see AmanuensisIndexWriter#startBatch()
+	 * @see AmanuensisIndexWriter#endBatch()
 	 */
 	public void cancelBatch() {
 		if (!isBatching()) {
@@ -118,7 +118,7 @@ public class InfinispanIndexWriter {
 		} else {
 			batchOps.remove();
 			if (log.isDebugEnabled()) {
-				log.debug("Batching cancelled for index " + indexName);
+				log.debug("Batching cancelled for index " + directoryId);
 			}
 		}
 	}
@@ -191,7 +191,7 @@ public class InfinispanIndexWriter {
 		if (isBatching()) {
 			batchOps.get().addOperations(ops);
 		} else {
-			manager.dispatchOperations(new IndexOperations(this.indexName, ops));
+			manager.dispatchOperations(new IndexOperations(this.directoryId, ops));
 		}
 	}
 

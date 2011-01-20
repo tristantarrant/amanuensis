@@ -34,7 +34,9 @@ import net.dataforte.commons.slf4j.LoggerFactory;
 import net.dataforte.infinispan.amanuensis.backend.lucene.LuceneOperationExecutorFactory;
 
 import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
+import org.apache.lucene.store.Directory;
 import org.infinispan.lucene.InfinispanDirectory;
 import org.slf4j.Logger;
 
@@ -51,11 +53,11 @@ public class ExecutorContext {
 	private static final IndexWriter.MaxFieldLength MAX_FIELD_LENGTH = new IndexWriter.MaxFieldLength(IndexWriter.DEFAULT_MAX_FIELD_LENGTH);
 	private final ExecutorService executor;
 	private LuceneOperationExecutorFactory operationExecutorFactory;
-	private final InfinispanDirectory directory;
+	private final Directory directory;
 	private IndexWriter writer;
 	private Analyzer analyzer;
 
-	public ExecutorContext(InfinispanDirectory directory, Analyzer analyzer) {
+	public ExecutorContext(Directory directory, Analyzer analyzer) {
 		this.executor = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(QUEUE_MAX_LENGTH), new ExecutorThreadFactory("IndexWriter"), new BlockingPolicy());		
 		this.directory = directory;
 		this.analyzer = analyzer;
@@ -74,7 +76,7 @@ public class ExecutorContext {
 		this.operationExecutorFactory = operationExecutorFactory;
 	}
 
-	public InfinispanDirectory getDirectory() {
+	public Directory getDirectory() {
 		return directory;
 	}
 
@@ -82,10 +84,13 @@ public class ExecutorContext {
 		if (writer != null)
 			return writer;
 		try {
-			writer = new IndexWriter(directory, analyzer, true, MAX_FIELD_LENGTH);
+			IndexReader r = IndexReader.open(directory);
+			r.numDocs();
+			
+			writer = new IndexWriter(directory, analyzer, false, MAX_FIELD_LENGTH);
 		} catch (IOException e) {
 			writer = null;
-			throw new IndexerException("Error while creating writer for index " + directory.getIndexName(), e);
+			throw new IndexerException("Error while creating writer for index " + AmanuensisManager.getUniqueDirectoryIdentifier(directory), e);
 		}
 		return writer;
 	}
@@ -95,7 +100,7 @@ public class ExecutorContext {
 			try {
 				writer.commit();
 			} catch (IOException e) {
-				throw new IndexerException("Error while committing writer for index " + directory.getIndexName(), e);
+				throw new IndexerException("Error while committing writer for index " + AmanuensisManager.getUniqueDirectoryIdentifier(directory), e);
 			}
 		}
 	}
@@ -107,7 +112,7 @@ public class ExecutorContext {
 			try {
 				w.close();
 			} catch (IOException e) {
-				log.error("Error while closing writer for index " + directory.getIndexName(), e);
+				log.error("Error while closing writer for index " + AmanuensisManager.getUniqueDirectoryIdentifier(directory), e);
 			}
 		}
 	}
@@ -120,7 +125,7 @@ public class ExecutorContext {
 				IndexWriter.unlock(this.directory);
 			}
 		} catch (Exception e) {
-			log.warn("Error while unlocking writer for index " + directory.getIndexName(), e);
+			log.warn("Error while unlocking writer for index " + AmanuensisManager.getUniqueDirectoryIdentifier(directory), e);
 		}
 	}
 
@@ -131,7 +136,6 @@ public class ExecutorContext {
 	 * @author Sanne Grinovero
 	 */
 	private static class ExecutorThreadFactory implements ThreadFactory {
-
 		final ThreadGroup group;
 		final AtomicInteger threadNumber = new AtomicInteger(1);
 		final String namePrefix;
