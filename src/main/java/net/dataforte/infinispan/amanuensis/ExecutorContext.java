@@ -83,9 +83,6 @@ public class ExecutorContext {
 		if (writer != null)
 			return writer;
 		try {
-			IndexReader r = IndexReader.open(directory);
-			r.numDocs();
-			
 			writer = new IndexWriter(directory, analyzer, true, MAX_FIELD_LENGTH);
 		} catch (IOException e) {
 			writer = null;
