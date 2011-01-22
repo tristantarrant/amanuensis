@@ -37,7 +37,6 @@ import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.store.Directory;
-import org.infinispan.lucene.InfinispanDirectory;
 import org.slf4j.Logger;
 
 /**
@@ -87,7 +86,7 @@ public class ExecutorContext {
 			IndexReader r = IndexReader.open(directory);
 			r.numDocs();
 			
-			writer = new IndexWriter(directory, analyzer, false, MAX_FIELD_LENGTH);
+			writer = new IndexWriter(directory, analyzer, true, MAX_FIELD_LENGTH);
 		} catch (IOException e) {
 			writer = null;
 			throw new IndexerException("Error while creating writer for index " + AmanuensisManager.getUniqueDirectoryIdentifier(directory), e);
