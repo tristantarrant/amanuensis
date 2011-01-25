@@ -1,5 +1,5 @@
 /**
- * Amanuensis, a distributed Lucene Index Writer for Infinispan
+ * Amanuensis, a distributed Lucene Index Writer
  *
  * Copyright (c) 2011, Tristan Tarrant
  *
@@ -127,6 +127,10 @@ public class AmanuensisManager {
 			log.error("Could not obtain an IndexWriter");
 			throw new IndexerException(e);
 		}
+	}
+	
+	public AmanuensisIndexReader getIndexReader(String name) throws IndexerException {
+		return null;
 	}
 	
 	public static String getUniqueDirectoryIdentifier(Directory directory) {

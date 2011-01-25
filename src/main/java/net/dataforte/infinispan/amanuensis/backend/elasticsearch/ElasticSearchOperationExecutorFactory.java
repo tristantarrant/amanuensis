@@ -19,7 +19,7 @@
  * Boston, MA  02110-1301  USA
  */
 
-package net.dataforte.infinispan.amanuensis.backend.lucene;
+package net.dataforte.infinispan.amanuensis.backend.elasticsearch;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -28,16 +28,14 @@ import net.dataforte.infinispan.amanuensis.IndexOperation;
 import net.dataforte.infinispan.amanuensis.ops.AddDocumentOperation;
 import net.dataforte.infinispan.amanuensis.ops.DeleteDocumentsQueriesOperation;
 import net.dataforte.infinispan.amanuensis.ops.DeleteDocumentsTermsOperation;
-import net.dataforte.infinispan.amanuensis.ops.OptimizeIndexOperation;
 
-public class LuceneOperationExecutorFactory {
+public class ElasticSearchOperationExecutorFactory {
 	Map<Class<? extends IndexOperation>, OperationExecutor<? extends IndexOperation>> executor = new HashMap<Class<? extends IndexOperation>, OperationExecutor<? extends IndexOperation>>();
 	
-	public LuceneOperationExecutorFactory() {
+	public ElasticSearchOperationExecutorFactory() {
 		executor.put(AddDocumentOperation.class, new AddDocumentExecutor());
 		executor.put(DeleteDocumentsTermsOperation.class, new DeleteDocumentsTermsExecutor());
-		executor.put(DeleteDocumentsQueriesOperation.class, new DeleteDocumentsQueriesExecutor());
-		executor.put(OptimizeIndexOperation.class, new OptimizeIndexExecutor());
+		executor.put(DeleteDocumentsQueriesOperation.class, new DeleteDocumentsQueriesExecutor());		
 	}
 
 	public OperationExecutor<? extends IndexOperation> getExecutor(Class<? extends IndexOperation> klass) {

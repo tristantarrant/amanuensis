@@ -19,20 +19,20 @@
  * Boston, MA  02110-1301  USA
  */
 
-package net.dataforte.infinispan.amanuensis.backend.lucene;
+package net.dataforte.infinispan.amanuensis.backend.elasticsearch;
 
 import java.io.IOException;
 
-import net.dataforte.infinispan.amanuensis.ops.DeleteDocumentsTermsOperation;
+import net.dataforte.infinispan.amanuensis.backend.lucene.OperationExecutor;
+import net.dataforte.infinispan.amanuensis.ops.OptimizeIndexOperation;
 
 import org.apache.lucene.index.IndexWriter;
 
-public class DeleteDocumentsTermsExecutor extends OperationExecutor<DeleteDocumentsTermsOperation> {
+public class OptimizeIndexExecutor extends OperationExecutor<OptimizeIndexOperation> {
 
 	@Override
-	public void execute(IndexWriter w, DeleteDocumentsTermsOperation op) throws IOException {		
-		w.deleteDocuments(op.getTerms());
+	public void execute(IndexWriter w, OptimizeIndexOperation op) throws IOException {
+		w.optimize();
 	}
-
 
 }

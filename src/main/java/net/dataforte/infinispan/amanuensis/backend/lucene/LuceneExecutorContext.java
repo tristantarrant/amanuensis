@@ -19,7 +19,7 @@
  * Boston, MA  02110-1301  USA
  */
 
-package net.dataforte.infinispan.amanuensis;
+package net.dataforte.infinispan.amanuensis.backend.lucene;
 
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
@@ -31,10 +31,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import net.dataforte.commons.slf4j.LoggerFactory;
-import net.dataforte.infinispan.amanuensis.backend.lucene.LuceneOperationExecutorFactory;
+import net.dataforte.infinispan.amanuensis.AmanuensisManager;
+import net.dataforte.infinispan.amanuensis.IndexerException;
 
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.store.Directory;
 import org.slf4j.Logger;
@@ -45,7 +45,7 @@ import org.slf4j.Logger;
  * @author Tristan Tarrant
  * 
  */
-public class ExecutorContext {
+public class LuceneExecutorContext {
 	private static final Logger log = LoggerFactory.make();
 	private static final String THREAD_GROUP_PREFIX = "Amanuensis: ";
 	private static final int QUEUE_MAX_LENGTH = 1000;
@@ -56,7 +56,7 @@ public class ExecutorContext {
 	private IndexWriter writer;
 	private Analyzer analyzer;
 
-	public ExecutorContext(Directory directory, Analyzer analyzer) {
+	public LuceneExecutorContext(Directory directory, Analyzer analyzer) {
 		this.executor = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(QUEUE_MAX_LENGTH), new ExecutorThreadFactory("IndexWriter"), new BlockingPolicy());		
 		this.directory = directory;
 		this.analyzer = analyzer;
