@@ -23,25 +23,14 @@ package net.dataforte.infinispan.amanuensis;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ExecutionException;
-
-import net.dataforte.commons.collections.Computable;
-import net.dataforte.commons.collections.Memoizer;
-import net.dataforte.commons.slf4j.LoggerFactory;
-import net.dataforte.infinispan.amanuensis.backend.jgroups.JGroupsOperationDispatcher;
-import net.dataforte.infinispan.amanuensis.backend.jgroups.JGroupsOperationProcessor;
-import net.dataforte.infinispan.amanuensis.backend.lucene.LuceneOperationDispatcher;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.SimpleAnalyzer;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
-import org.infinispan.lifecycle.ComponentStatus;
 import org.infinispan.lucene.InfinispanDirectory;
 import org.infinispan.manager.EmbeddedCacheManager;
-import org.infinispan.remoting.transport.Address;
-import org.slf4j.Logger;
 
 /**
  * AmanuensisManager is the entry point for obtaining {@link AmanuensisIndexWriter} instances.
@@ -52,37 +41,15 @@ import org.slf4j.Logger;
  * @author Tristan Tarrant
  *
  */
-public class AmanuensisManager {
-	private static final Logger log = LoggerFactory.make();
-	private static final short INFINISPAN_INDEX_WRITER_SCOPE_ID = 1234;
+public abstract class AmanuensisManager {
+	
 	private static final Analyzer SIMPLE_ANALYZER = new SimpleAnalyzer();
-	private final EmbeddedCacheManager cacheManager;
-	private ConcurrentMap<String, Directory> directoryMap = new ConcurrentHashMap<String, Directory>();
-	private Memoizer<String, AmanuensisIndexWriter> writerMap;
-	private JGroupsOperationProcessor remoteOperationProcessor;
-	private OperationDispatcher remoteOperationDispatcher;
-	private OperationDispatcher localOperationDispatcher;
+	
+	protected ConcurrentMap<String, Directory> directoryMap = new ConcurrentHashMap<String, Directory>();
+	
 	private Analyzer analyzer = SIMPLE_ANALYZER;
 
-	/**
-	 * Constructs an {@link AmanuensisManager} using the specified
-	 * {@link EmbeddedCacheManager}
-	 * 
-	 * @param cacheManager
-	 */
-	public AmanuensisManager(EmbeddedCacheManager cacheManager) {
-		if (cacheManager==null) {
-			throw new IllegalArgumentException("cacheManager cannot be null");
-		}
-		if (cacheManager.getStatus()!=ComponentStatus.RUNNING) {
-			throw new IllegalStateException("Cache is not running");
-		}
-		this.cacheManager = cacheManager;
-		this.writerMap = new Memoizer<String, AmanuensisIndexWriter>(new InfinispanIndexWriterMemoizer());
-		this.remoteOperationProcessor = new JGroupsOperationProcessor(this, INFINISPAN_INDEX_WRITER_SCOPE_ID);
-		this.remoteOperationDispatcher = new JGroupsOperationDispatcher(this, this.remoteOperationProcessor.getDispatcher());
-		this.localOperationDispatcher = new LuceneOperationDispatcher(this);
-	}
+	
 
 	public Analyzer getAnalyzer() {
 		return analyzer;
@@ -104,30 +71,9 @@ public class AmanuensisManager {
 	 * Stops this instance from receiving/sending indexing jobs to other nodes.
 	 * Should only be invoked just before stopping the underlying {@link EmbeddedCacheManager}
 	 */
-	public void close() {
-		this.remoteOperationProcessor.close();
-	}
+	public abstract void close();
 
-	/**
-	 * Retrieves (or initializes) an instance of InfinispanIndexWriter for the
-	 * specified directory
-	 * 
-	 * @param directory
-	 * @return
-	 */
-	public AmanuensisIndexWriter getIndexWriter(Directory directory) throws IndexerException {
-		if (directory==null) {
-			throw new IllegalArgumentException("directory cannot be null");
-		}
-		String directoryId = getUniqueDirectoryIdentifier(directory);
-		try {
-			directoryMap.putIfAbsent(directoryId, directory);
-			return writerMap.compute(directoryId);
-		} catch (Exception e) {
-			log.error("Could not obtain an IndexWriter");
-			throw new IndexerException(e);
-		}
-	}
+	
 	
 	public AmanuensisIndexReader getIndexReader(String name) throws IndexerException {
 		return null;
@@ -154,22 +100,7 @@ public class AmanuensisManager {
 		return directoryMap.get(indexName);
 	}
 
-	/**
-	 * Returns the cluster's {@link Address} of the master
-	 * @return
-	 */
-	public Address getMasterAddress() {
-		return cacheManager.getCoordinator();
-	}
 
-	/**
-	 * Returns the cluster's {@link Address} of the local node
-	 * 
-	 * @return
-	 */
-	public Address getLocalAddress() {
-		return cacheManager.getAddress();
-	}
 
 	/**
 	 * Dispatches the message to the appropriate destination depending on the
@@ -178,26 +109,6 @@ public class AmanuensisManager {
 	 * @param indexOperations
 	 * @throws IndexerException
 	 */
-	public void dispatchOperations(IndexOperations indexOperations) throws IndexerException {
-		if (cacheManager.isCoordinator()) {
-			// process the messages locally
-			this.localOperationDispatcher.dispatch(indexOperations);
-		} else {
-			// send them to the remote
-			this.remoteOperationDispatcher.dispatch(indexOperations);
-		}
-	}
-
-	private class InfinispanIndexWriterMemoizer implements Computable<String, AmanuensisIndexWriter> {
-		@Override
-		public AmanuensisIndexWriter compute(String indexName) throws InterruptedException, ExecutionException {
-			try {
-				return new AmanuensisIndexWriter(AmanuensisManager.this, AmanuensisManager.this.directoryMap.get(indexName));
-			} catch (IndexerException e) {
-				throw new ExecutionException(e);
-			}
-		}
-
-	}
+	public abstract void dispatchOperations(IndexOperations indexOperations) throws IndexerException;
 
 }
