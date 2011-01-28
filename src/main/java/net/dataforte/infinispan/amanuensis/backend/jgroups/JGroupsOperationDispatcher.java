@@ -22,10 +22,10 @@
 package net.dataforte.infinispan.amanuensis.backend.jgroups;
 
 import net.dataforte.commons.slf4j.LoggerFactory;
+import net.dataforte.infinispan.amanuensis.AmanuensisManager;
 import net.dataforte.infinispan.amanuensis.IndexOperations;
 import net.dataforte.infinispan.amanuensis.IndexerException;
 import net.dataforte.infinispan.amanuensis.OperationDispatcher;
-import net.dataforte.infinispan.amanuensis.backend.infinispan.AmanuensisInfinispanManager;
 
 import org.infinispan.remoting.transport.jgroups.JGroupsAddress;
 import org.jgroups.Address;
@@ -44,10 +44,10 @@ import org.slf4j.Logger;
  */
 public class JGroupsOperationDispatcher implements OperationDispatcher {
 	private static final Logger log = LoggerFactory.make();
-	private AmanuensisInfinispanManager manager;
+	private AmanuensisManager manager;
 	private MuxMessageDispatcher messageDispatcher;
 
-	public JGroupsOperationDispatcher(AmanuensisInfinispanManager manager, MuxMessageDispatcher messageDispatcher) {
+	public JGroupsOperationDispatcher(AmanuensisManager manager, MuxMessageDispatcher messageDispatcher) {
 		this.manager = manager;
 		this.messageDispatcher = messageDispatcher;
 	}
