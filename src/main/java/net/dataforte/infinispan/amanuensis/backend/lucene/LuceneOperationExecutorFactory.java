@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.dataforte.infinispan.amanuensis.IndexOperation;
+import net.dataforte.infinispan.amanuensis.OperationExecutor;
 import net.dataforte.infinispan.amanuensis.ops.AddDocumentOperation;
 import net.dataforte.infinispan.amanuensis.ops.DeleteDocumentsQueriesOperation;
 import net.dataforte.infinispan.amanuensis.ops.DeleteDocumentsTermsOperation;

@@ -22,8 +22,10 @@
 package net.dataforte.infinispan.amanuensis.backend.lucene;
 
 import net.dataforte.commons.slf4j.LoggerFactory;
+import net.dataforte.infinispan.amanuensis.ExecutorContext;
 import net.dataforte.infinispan.amanuensis.IndexOperation;
 import net.dataforte.infinispan.amanuensis.IndexOperations;
+import net.dataforte.infinispan.amanuensis.OperationExecutor;
 
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.store.LockObtainFailedException;
@@ -33,13 +35,13 @@ import org.slf4j.Logger;
  * 
  * @author Tristan Tarrant
  */
-public class LuceneOperationQueueExecutor implements Runnable {
+public class DirectoryOperationQueueExecutor implements Runnable {
 	private static final Logger log = LoggerFactory.make();
 
-	private LuceneExecutorContext context;
+	private ExecutorContext context;
 	private IndexOperations ops;
 
-	public LuceneOperationQueueExecutor(LuceneExecutorContext context, IndexOperations ops) {
+	public DirectoryOperationQueueExecutor(ExecutorContext context, IndexOperations ops) {
 		this.context = context;		
 		this.ops = ops;
 	}

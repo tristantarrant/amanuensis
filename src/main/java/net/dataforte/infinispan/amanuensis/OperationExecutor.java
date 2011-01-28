@@ -19,24 +19,20 @@
  * Boston, MA  02110-1301  USA
  */
 
-package net.dataforte.infinispan.amanuensis.backend.elasticsearch;
+package net.dataforte.infinispan.amanuensis;
 
 import java.io.IOException;
 
-import net.dataforte.infinispan.amanuensis.ops.DeleteDocumentsQueriesOperation;
+import org.apache.lucene.index.IndexWriter;
 
-import org.elasticsearch.client.Client;
-import org.elasticsearch.client.action.bulk.BulkRequestBuilder;
 
-public class DeleteDocumentsQueriesExecutor extends OperationExecutor<DeleteDocumentsQueriesOperation> {
+public abstract class OperationExecutor<T extends IndexOperation> {
 
-	@Override
-	public void execute(String indexName, Client c, BulkRequestBuilder b, DeleteDocumentsQueriesOperation op) throws IOException {
-		// TODO Auto-generated method stub
-		
-	}
-
+	 public abstract void execute(IndexWriter w, T op) throws IOException;
 	
-
+	@SuppressWarnings(value="unchecked")
+	public void exec(IndexWriter w, IndexOperation op) throws IOException {
+		this.execute(w, (T)op);
+	}
 	
 }
