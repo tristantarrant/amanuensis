@@ -34,6 +34,7 @@ import net.dataforte.infinispan.amanuensis.backend.lucene.LuceneOperationDispatc
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.SimpleAnalyzer;
+import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
@@ -59,6 +60,7 @@ public class AmanuensisManager {
 	private final EmbeddedCacheManager cacheManager;
 	private ConcurrentMap<String, Directory> directoryMap = new ConcurrentHashMap<String, Directory>();
 	private Memoizer<String, AmanuensisIndexWriter> writerMap;
+	private Memoizer<String, AmanuensisIndexReader> readerMap;
 	private JGroupsOperationProcessor remoteOperationProcessor;
 	private OperationDispatcher remoteOperationDispatcher;
 	private OperationDispatcher localOperationDispatcher;
@@ -78,7 +80,8 @@ public class AmanuensisManager {
 			throw new IllegalStateException("Cache is not running");
 		}
 		this.cacheManager = cacheManager;
-		this.writerMap = new Memoizer<String, AmanuensisIndexWriter>(new InfinispanIndexWriterMemoizer());
+		this.writerMap = new Memoizer<String, AmanuensisIndexWriter>(new IndexWriterMemoizer());
+		this.readerMap = new Memoizer<String, AmanuensisIndexReader>(new IndexReaderMemoizer());
 		this.remoteOperationProcessor = new JGroupsOperationProcessor(this, INFINISPAN_INDEX_WRITER_SCOPE_ID);
 		this.remoteOperationDispatcher = new JGroupsOperationDispatcher(this, this.remoteOperationProcessor.getDispatcher());
 		this.localOperationDispatcher = new LuceneOperationDispatcher(this);
@@ -125,6 +128,29 @@ public class AmanuensisManager {
 			return writerMap.compute(directoryId);
 		} catch (Exception e) {
 			log.error("Could not obtain an IndexWriter");
+			throw new IndexerException(e);
+		}
+	}
+	
+	
+	/**
+	 * Retrieves (or initializes) an instance of AmanuensisIndexReader for the specified
+	 * directory
+	 * 
+	 * @param directory
+	 * @return
+	 * @throws IndexerException
+	 */
+	public AmanuensisIndexReader getIndexReader(Directory directory) throws IndexerException {
+		if (directory==null) {
+			throw new IllegalArgumentException("directory cannot be null");
+		}
+		String directoryId = getUniqueDirectoryIdentifier(directory);
+		try {
+			directoryMap.putIfAbsent(directoryId, directory);
+			return readerMap.compute(directoryId);
+		} catch (Exception e) {
+			log.error("Could not obtain an IndexReader");
 			throw new IndexerException(e);
 		}
 	}
@@ -184,11 +210,23 @@ public class AmanuensisManager {
 		}
 	}
 
-	private class InfinispanIndexWriterMemoizer implements Computable<String, AmanuensisIndexWriter> {
+	private class IndexWriterMemoizer implements Computable<String, AmanuensisIndexWriter> {
 		@Override
 		public AmanuensisIndexWriter compute(String indexName) throws InterruptedException, ExecutionException {
 			try {
 				return new AmanuensisIndexWriter(AmanuensisManager.this, AmanuensisManager.this.directoryMap.get(indexName));
+			} catch (IndexerException e) {
+				throw new ExecutionException(e);
+			}
+		}
+
+	}
+	
+	private class IndexReaderMemoizer implements Computable<String, AmanuensisIndexReader> {
+		@Override
+		public AmanuensisIndexReader compute(String indexName) throws InterruptedException, ExecutionException {
+			try {
+				return new AmanuensisIndexReader(AmanuensisManager.this, AmanuensisManager.this.directoryMap.get(indexName));
 			} catch (IndexerException e) {
 				throw new ExecutionException(e);
 			}
