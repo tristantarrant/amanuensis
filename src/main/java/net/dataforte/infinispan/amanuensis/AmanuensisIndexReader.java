@@ -18,6 +18,10 @@ public class AmanuensisIndexReader {
 		try {
 			IndexReader freshReader = r.reopen();
 			
+			if(freshReader!=r) {	// If the freshReader is really "fresh", we should close the previous one
+				r.close(); //FIXME: should only close when there are no other users left
+			}
+			
 			return freshReader;
 		} catch (Exception e) {
 			throw new IndexerException("Could not refresh IndexReader", e);
