@@ -34,7 +34,6 @@ import net.dataforte.infinispan.amanuensis.backend.lucene.LuceneOperationDispatc
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.SimpleAnalyzer;
-import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
@@ -86,6 +85,19 @@ public class AmanuensisManager {
 		this.remoteOperationDispatcher = new JGroupsOperationDispatcher(this, this.remoteOperationProcessor.getDispatcher());
 		this.localOperationDispatcher = new LuceneOperationDispatcher(this);
 	}
+	
+	/**
+	 * Initializes writers and readers for all the directories
+	 * 
+	 * @param directories
+	 * @throws IndexerException
+	 */
+	public void initialize(Directory...directories) throws IndexerException {
+		for(Directory directory : directories) {
+			getIndexWriter(directory);
+			getIndexReader(directory);
+		}
+	}
 
 	public Analyzer getAnalyzer() {
 		return analyzer;
@@ -132,6 +144,21 @@ public class AmanuensisManager {
 		}
 	}
 	
+	public AmanuensisIndexWriter getIndexWriter(String indexName) throws IndexerException {
+		if (indexName==null) {
+			throw new IllegalArgumentException("directory cannot be null");
+		}
+		if(!directoryMap.containsKey(indexName))
+			throw new IndexerException("Unknown index "+indexName);
+		try {
+			
+			return writerMap.compute(indexName);
+		} catch (Exception e) {
+			log.error("Could not obtain an IndexWriter for "+indexName);
+			throw new IndexerException(e);
+		}
+	}
+	
 	
 	/**
 	 * Retrieves (or initializes) an instance of AmanuensisIndexReader for the specified
@@ -151,6 +178,21 @@ public class AmanuensisManager {
 			return readerMap.compute(directoryId);
 		} catch (Exception e) {
 			log.error("Could not obtain an IndexReader");
+			throw new IndexerException(e);
+		}
+	}
+	
+	public AmanuensisIndexReader getIndexReader(String indexName) throws IndexerException {
+		if (indexName==null) {
+			throw new IllegalArgumentException("directory cannot be null");
+		}
+		if(!directoryMap.containsKey(indexName))
+			throw new IndexerException("Unknown index "+indexName);
+		try {
+			
+			return readerMap.compute(indexName);
+		} catch (Exception e) {
+			log.error("Could not obtain an IndexReader for "+indexName);
 			throw new IndexerException(e);
 		}
 	}
