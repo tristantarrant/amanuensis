@@ -58,7 +58,7 @@ public class LuceneOperationDispatcher implements OperationDispatcher {
 	private class ExecutorContextComputer implements Computable<String, ExecutorContext> {
 		@Override
 		public ExecutorContext compute(String indexName) throws InterruptedException, ExecutionException {
-			ExecutorContext executorContext = new ExecutorContext(LuceneOperationDispatcher.this.manager.getDirectoryByIndexName(indexName), LuceneOperationDispatcher.this.manager.getAnalyzer());
+			ExecutorContext executorContext = new ExecutorContext(manager, LuceneOperationDispatcher.this.manager.getDirectoryByIndexName(indexName), LuceneOperationDispatcher.this.manager.getAnalyzer());
 			return executorContext;			
 		}
 		

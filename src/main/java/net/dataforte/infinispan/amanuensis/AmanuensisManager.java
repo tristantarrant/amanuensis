@@ -35,6 +35,7 @@ import net.dataforte.infinispan.amanuensis.backend.lucene.LuceneOperationDispatc
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.SimpleAnalyzer;
 import org.apache.lucene.index.IndexWriter;
+import org.apache.lucene.index.LogByteSizeMergePolicy;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.infinispan.lifecycle.ComponentStatus;
@@ -63,6 +64,7 @@ public class AmanuensisManager {
 	private JGroupsOperationProcessor remoteOperationProcessor;
 	private OperationDispatcher remoteOperationDispatcher;
 	private OperationDispatcher localOperationDispatcher;
+	private WriterConfigurator writerConfigurator = new DefaultWriterConfigurator();
 	private Analyzer analyzer = SIMPLE_ANALYZER;
 
 	/**
@@ -97,6 +99,14 @@ public class AmanuensisManager {
 			getIndexWriter(directory);
 			getIndexReader(directory);
 		}
+	}
+
+	public WriterConfigurator getWriterConfigurator() {
+		return writerConfigurator;
+	}
+
+	public void setWriterConfigurator(WriterConfigurator writerConfigurator) {
+		this.writerConfigurator = writerConfigurator;
 	}
 
 	public Analyzer getAnalyzer() {

@@ -72,6 +72,11 @@
 			<version>${version.lucene}</version>
 		</dependency>
 		<dependency>
+			<groupId>org.apache.lucene</groupId>
+			<artifactId>lucene-misc</artifactId>
+			<version>${version.lucene}</version>
+		</dependency>
+		<dependency>
 			<groupId>net.dataforte</groupId>
 			<artifactId>dataforte-commons</artifactId>
 			<version>0.0.5</version>
