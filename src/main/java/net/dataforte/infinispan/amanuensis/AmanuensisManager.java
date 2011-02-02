@@ -29,7 +29,7 @@ import net.dataforte.commons.collections.Computable;
 import net.dataforte.commons.collections.Memoizer;
 import net.dataforte.commons.slf4j.LoggerFactory;
 import net.dataforte.infinispan.amanuensis.backend.jgroups.JGroupsOperationDispatcher;
-import net.dataforte.infinispan.amanuensis.backend.jgroups.JGroupsOperationProcessor;
+import net.dataforte.infinispan.amanuensis.backend.jgroups.JGroupsOperationReceiver;
 import net.dataforte.infinispan.amanuensis.backend.lucene.LuceneOperationDispatcher;
 
 import org.apache.lucene.analysis.Analyzer;
@@ -61,7 +61,7 @@ public class AmanuensisManager {
 	private ConcurrentMap<String, Directory> directoryMap = new ConcurrentHashMap<String, Directory>();
 	private Memoizer<String, AmanuensisIndexWriter> writerMap;
 	private Memoizer<String, AmanuensisIndexReader> readerMap;
-	private JGroupsOperationProcessor remoteOperationProcessor;
+	private JGroupsOperationReceiver remoteOperationProcessor;
 	private OperationDispatcher remoteOperationDispatcher;
 	private OperationDispatcher localOperationDispatcher;
 	private WriterConfigurator writerConfigurator = new DefaultWriterConfigurator();
@@ -83,7 +83,7 @@ public class AmanuensisManager {
 		this.cacheManager = cacheManager;
 		this.writerMap = new Memoizer<String, AmanuensisIndexWriter>(new IndexWriterMemoizer());
 		this.readerMap = new Memoizer<String, AmanuensisIndexReader>(new IndexReaderMemoizer());
-		this.remoteOperationProcessor = new JGroupsOperationProcessor(this, INFINISPAN_INDEX_WRITER_SCOPE_ID);
+		this.remoteOperationProcessor = new JGroupsOperationReceiver(this, INFINISPAN_INDEX_WRITER_SCOPE_ID);
 		this.remoteOperationDispatcher = new JGroupsOperationDispatcher(this, this.remoteOperationProcessor.getDispatcher());
 		this.localOperationDispatcher = new LuceneOperationDispatcher(this);
 	}

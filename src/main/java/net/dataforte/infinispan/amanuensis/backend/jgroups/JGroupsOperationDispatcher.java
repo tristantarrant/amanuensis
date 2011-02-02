@@ -58,8 +58,8 @@ public class JGroupsOperationDispatcher implements OperationDispatcher {
 		Address src = ((JGroupsAddress)manager.getLocalAddress()).getJGroupsAddress();
 		Message message = new Message(dest, src, ops);		
 		try {
-			if(log.isDebugEnabled()) {
-				log.debug("Sending {} to {}", ops.toString(), dest.toString());
+			if(log.isTraceEnabled()) {
+				log.trace("Sending {} to {}", ops.toString(), dest.toString());
 			}
 			messageDispatcher.sendMessage(message, RequestOptions.ASYNC);
 		} catch (SuspectedException e) {

@@ -39,12 +39,12 @@ import org.slf4j.Logger;
  * 
  * @author Tristan Tarrant
  */
-public class JGroupsOperationProcessor implements RequestHandler {
+public class JGroupsOperationReceiver implements RequestHandler {
 	private static final Logger log = LoggerFactory.make();
 	private AmanuensisManager manager;
 	private MuxMessageDispatcher dispatcher;
 
-	public JGroupsOperationProcessor(AmanuensisManager manager, short scopeId) {
+	public JGroupsOperationReceiver(AmanuensisManager manager, short scopeId) {
 		this.manager = manager;
 		// Register the dispatcher for receiving messages
 		this.dispatcher = new MuxMessageDispatcher(scopeId, MuxChannelLookup.getChannel(), null, null, this);
@@ -70,8 +70,8 @@ public class JGroupsOperationProcessor implements RequestHandler {
 		}
 
 		if (ops != null) {
-			if (log.isDebugEnabled()) {
-				log.debug("Received {} operations from {}\n", ops, msg.getSrc());
+			if (log.isTraceEnabled()) {
+				log.trace("Received {} operations from {}\n", ops, msg.getSrc());
 			}
 			// The manager knows what to do
 			try {
