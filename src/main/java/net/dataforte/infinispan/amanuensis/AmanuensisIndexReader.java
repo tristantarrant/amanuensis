@@ -40,13 +40,15 @@ public class AmanuensisIndexReader {
 			throw new IndexerException("Could not create IndexReader", e);
 		}
 	}
-	
+
 	public IndexReader get() throws IndexerException {
 		return currentReader.refreshAndGet();
 	}
-	
-	public void release(IndexReader r) throws IndexerException {
-		allReaders.get(r).close();
+
+	public void release(IndexReader r) {
+		if (r != null) {
+			allReaders.get(r).close();
+		}
 	}
 
 	public void close() {

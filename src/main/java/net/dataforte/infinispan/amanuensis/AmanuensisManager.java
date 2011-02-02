@@ -35,7 +35,6 @@ import net.dataforte.infinispan.amanuensis.backend.lucene.LuceneOperationDispatc
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.SimpleAnalyzer;
 import org.apache.lucene.index.IndexWriter;
-import org.apache.lucene.index.LogByteSizeMergePolicy;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.infinispan.lifecycle.ComponentStatus;
@@ -145,7 +144,7 @@ public class AmanuensisManager {
 			throw new IllegalArgumentException("directory cannot be null");
 		}
 		String directoryId = getUniqueDirectoryIdentifier(directory);
-		try {
+		try {			
 			directoryMap.putIfAbsent(directoryId, directory);
 			return writerMap.compute(directoryId);
 		} catch (Exception e) {

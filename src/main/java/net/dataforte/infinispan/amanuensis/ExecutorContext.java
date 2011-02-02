@@ -34,10 +34,7 @@ import net.dataforte.commons.slf4j.LoggerFactory;
 import net.dataforte.infinispan.amanuensis.backend.lucene.LuceneOperationExecutorFactory;
 
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.index.BalancedSegmentMergePolicy;
 import org.apache.lucene.index.IndexWriter;
-import org.apache.lucene.index.LogByteSizeMergePolicy;
-import org.apache.lucene.index.MergePolicy;
 import org.apache.lucene.store.Directory;
 import org.slf4j.Logger;
 
@@ -87,7 +84,7 @@ public class ExecutorContext {
 		if (writer != null)
 			return writer;
 		try {
-			writer = new IndexWriter(directory, analyzer, true, MAX_FIELD_LENGTH);
+			writer = new IndexWriter(directory, analyzer, MAX_FIELD_LENGTH);
 			manager.getWriterConfigurator().configure(writer);
 		} catch (IOException e) {
 			writer = null;
