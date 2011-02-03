@@ -43,7 +43,7 @@ public class AmanuensisIndexWriter {
 
 	public AmanuensisIndexWriter(AmanuensisManager manager, Directory directory) throws IndexerException {
 		this.manager = manager;
-		this.directoryId = manager.getUniqueDirectoryIdentifier(directory);
+		this.directoryId = AmanuensisManager.getUniqueDirectoryIdentifier(directory);
 		this.directory = directory;
 		this.batchOps = new ThreadLocal<IndexOperations>();
 	}

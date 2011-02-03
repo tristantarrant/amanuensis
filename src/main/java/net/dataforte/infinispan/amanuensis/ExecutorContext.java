@@ -47,7 +47,7 @@ import org.slf4j.Logger;
 public class ExecutorContext {
 	private static final Logger log = LoggerFactory.make();
 	private static final String THREAD_GROUP_PREFIX = "Amanuensis: ";
-	private static final int QUEUE_MAX_LENGTH = 1000;
+	private static final int QUEUE_MAX_LENGTH = 10000;
 	private static final IndexWriter.MaxFieldLength MAX_FIELD_LENGTH = new IndexWriter.MaxFieldLength(IndexWriter.DEFAULT_MAX_FIELD_LENGTH);
 	private final ExecutorService executor;
 	private LuceneOperationExecutorFactory operationExecutorFactory;
