@@ -181,7 +181,9 @@ public class AmanuensisIndexReader {
 				try {
 					updatedReader = beforeUpdateReader.reopen();
 				} catch (IOException e) {
-					throw new IndexerException("Unable to reopen IndexReader", e);
+					// FIXME: see if there are better options
+					log.warn("Unable to reopen IndexReader, using old one", e);
+					updatedReader = beforeUpdateReader;
 				}
 				if (beforeUpdateReader == updatedReader) {
 					previousCurrent = null;
