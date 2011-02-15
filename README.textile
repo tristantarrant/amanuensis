@@ -1,0 +1,7 @@
+h1. Amanuensis: Clustered Infinispan Index Writer using JGroups
+
+
+h2. What is it ?
+
+Amanuensis attempts to implement a pseudo-distributed Lucene IndexWriter for use with Infinispan's Lucene Directory implementation. It is modelled around Hibernate Search's backend from which it borrows many ideas and bits of code. Index operations are dispatched from slaves to one master (colocated with Infinispan's coordinator) which applies them to the real IndexWriter.
+Amanuensis also implements methods for obtaining efficient IndexReader instances which handle 

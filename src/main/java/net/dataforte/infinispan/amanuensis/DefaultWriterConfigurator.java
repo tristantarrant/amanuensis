@@ -109,7 +109,7 @@ public class DefaultWriterConfigurator implements WriterConfigurator {
 		mergePolicy.setCalibrateSizeByDeletes(calibrateSizeByDeletes);
 		mergePolicy.setNoCFSRatio(noCFSRatio);
 		mergePolicy.setUseCompoundDocStore(useCompoundDocStore);
-		mergePolicy.setUseCompoundFile(useCompoundFile);
+		mergePolicy.setUseCompoundFile(useCompoundFile);		
 		writer.setMergePolicy(mergePolicy);
 	}
 

@@ -1,0 +1,4 @@
+h1. Things to do
+
+* Robustness (persistent queues)
+* Backup support (snapshot/restore indices)
