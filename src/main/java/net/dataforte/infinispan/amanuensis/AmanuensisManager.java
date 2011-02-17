@@ -62,7 +62,7 @@ public class AmanuensisManager {
 	private Memoizer<String, AmanuensisIndexReader> readerMap;
 	private JGroupsOperationReceiver remoteOperationProcessor;
 	private OperationDispatcher remoteOperationDispatcher;
-	private OperationDispatcher localOperationDispatcher;
+	private LuceneOperationDispatcher localOperationDispatcher;
 	private WriterConfigurator writerConfigurator = new DefaultWriterConfigurator();
 	private Analyzer analyzer = SIMPLE_ANALYZER;
 
@@ -242,6 +242,15 @@ public class AmanuensisManager {
 	 */
 	public Address getLocalAddress() {
 		return cacheManager.getAddress();
+	}
+	
+	public void checkIndex(String indexName, boolean fix) throws IndexerException {
+		if(cacheManager.isCoordinator()) {
+			this.localOperationDispatcher.checkIndex(indexName, fix);
+		} else {
+			throw new IndexerException("checkIndex can only be run by the coordinator");
+		}
+		
 	}
 
 	/**

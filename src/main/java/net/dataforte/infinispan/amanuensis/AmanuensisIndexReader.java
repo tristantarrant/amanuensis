@@ -143,6 +143,7 @@ public class AmanuensisIndexReader {
 		 */
 		public ReaderUsagePair current; // guarded by lockOnReplaceCurrent
 		private final Lock lockOnReplaceCurrent = new ReentrantLock();
+		private Directory directory;
 
 		/**
 		 * @param directory
@@ -153,6 +154,7 @@ public class AmanuensisIndexReader {
 		 *             when the index initialization fails.
 		 */
 		public PerDirectoryLatestReader(Directory directory) throws IOException {
+			this.directory = directory;
 			IndexReader reader = readerFactory(directory);
 			ReaderUsagePair initialPair = new ReaderUsagePair(reader);
 			initialPair.usageCounter.set(1);// a token to mark as active
@@ -182,7 +184,7 @@ public class AmanuensisIndexReader {
 					updatedReader = beforeUpdateReader.reopen();
 				} catch (IOException e) {
 					// FIXME: see if there are better options
-					log.warn("Unable to reopen IndexReader, using old one", e);
+					log.warn("Unable to reopen IndexReader for index "+AmanuensisManager.getUniqueDirectoryIdentifier(directory)+", using old one", e);
 					updatedReader = beforeUpdateReader;
 				}
 				if (beforeUpdateReader == updatedReader) {

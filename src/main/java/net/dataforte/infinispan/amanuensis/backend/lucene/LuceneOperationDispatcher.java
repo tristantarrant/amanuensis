@@ -43,6 +43,15 @@ public class LuceneOperationDispatcher implements OperationDispatcher {
 		this.manager = manager;		
 		this.executorContexts = new Memoizer<String, ExecutorContext>(new ExecutorContextComputer());
 	}
+	
+	public void checkIndex(String indexName, boolean fix) {
+		try {
+			ExecutorContext context = executorContexts.compute(indexName);
+			context.check(fix);
+		} catch (Exception e) {
+			log.error("", e);
+		}
+	}
 
 	@Override
 	public void dispatch(IndexOperations ops) throws IndexerException {

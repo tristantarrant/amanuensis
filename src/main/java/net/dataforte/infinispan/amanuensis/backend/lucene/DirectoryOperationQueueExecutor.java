@@ -65,7 +65,7 @@ public class DirectoryOperationQueueExecutor implements Runnable {
 			context.commit();
 		} catch (Throwable t) {
 			log.error("Error while processing queue for index "+ops.getIndexName(), t);
-			try {				
+			try {			
 				context.close();
 			} finally {				
 				if (!(t.getCause() instanceof LockObtainFailedException)) {

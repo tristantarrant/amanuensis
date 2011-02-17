@@ -34,6 +34,8 @@ import net.dataforte.commons.slf4j.LoggerFactory;
 import net.dataforte.infinispan.amanuensis.backend.lucene.LuceneOperationExecutorFactory;
 
 import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.index.CheckIndex;
+import org.apache.lucene.index.CheckIndex.Status;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.store.Directory;
 import org.slf4j.Logger;
@@ -101,6 +103,9 @@ public class ExecutorContext {
 		if (writer != null) {
 			try {
 				writer.commit();
+				if(log.isTraceEnabled()) {
+					log.trace("Committed writer for index "+AmanuensisManager.getUniqueDirectoryIdentifier(directory));	
+				}
 			} catch (IOException e) {
 				throw new IndexerException("Error while committing writer for index " + AmanuensisManager.getUniqueDirectoryIdentifier(directory), e);
 			}
@@ -113,9 +118,30 @@ public class ExecutorContext {
 		if (w != null) {
 			try {
 				w.close();
+				if(log.isTraceEnabled()) {
+					log.debug("Closed writer for index "+AmanuensisManager.getUniqueDirectoryIdentifier(directory));
+				}
 			} catch (IOException e) {
 				log.error("Error while closing writer for index " + AmanuensisManager.getUniqueDirectoryIdentifier(directory), e);
 			}
+		}
+	}
+	
+	public synchronized Status check(boolean fix) {
+		try {
+			forceUnlock();
+			CheckIndex checker = new CheckIndex(directory);
+			Status check = checker.checkIndex();
+			if(check.clean) {
+				log.info("Index "+AmanuensisManager.getUniqueDirectoryIdentifier(directory)+" is clean");
+			} else {
+				log.warn("Index "+AmanuensisManager.getUniqueDirectoryIdentifier(directory)+" is NOT clean, fixing...");
+				checker.fixIndex(check);
+			}
+			return check;
+		} catch (IOException e) {
+			log.error("",e);
+			return null;
 		}
 	}
 
@@ -123,7 +149,7 @@ public class ExecutorContext {
 		try {
 			try {
 				close();
-			} finally {
+			} finally {				
 				IndexWriter.unlock(this.directory);
 			}
 		} catch (Exception e) {
