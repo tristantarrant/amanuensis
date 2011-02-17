@@ -84,6 +84,10 @@ public class ExecutorContext {
 		if (writer != null)
 			return writer;
 		try {
+			if(IndexWriter.isLocked(directory)) {
+				log.warn("Unlocking index "+ AmanuensisManager.getUniqueDirectoryIdentifier(directory)+" probable, crash of coordinator");
+				forceUnlock();
+			}
 			writer = new IndexWriter(directory, analyzer, MAX_FIELD_LENGTH);
 			manager.getWriterConfigurator().configure(writer);
 		} catch (IOException e) {
