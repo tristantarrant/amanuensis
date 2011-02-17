@@ -7,7 +7,7 @@
 	</parent>
 	<groupId>net.dataforte.infinispan</groupId>
 	<artifactId>amanuensis</artifactId>
-	<version>0.0.11-SNAPSHOT</version>
+	<version>0.0.11</version>
 	<name>Infinispan Amanuensis Lucene Indexer</name>
 
 	<properties>
