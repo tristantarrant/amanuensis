@@ -28,7 +28,6 @@ import net.dataforte.infinispan.amanuensis.IndexOperations;
 import net.dataforte.infinispan.amanuensis.OperationExecutor;
 
 import org.apache.lucene.index.IndexWriter;
-import org.apache.lucene.store.LockObtainFailedException;
 import org.slf4j.Logger;
 
 /**
@@ -64,14 +63,10 @@ public class DirectoryOperationQueueExecutor implements Runnable {
 			// Commit the changes
 			context.commit();
 		} catch (Throwable t) {
-			log.error("Error while processing queue for index "+ops.getIndexName(), t);
-			try {			
-				context.close();
-			} finally {				
-				if (!(t.getCause() instanceof LockObtainFailedException)) {
-					context.forceUnlock();
-				}
-			}
+			log.error("Error while processing queue for index "+ops.getIndexName()+", discarding writer and unlocking directory", t);
+			context.forceUnlock();
+			
+			// FIXME, we should retry the operation
 		}
 
 	}

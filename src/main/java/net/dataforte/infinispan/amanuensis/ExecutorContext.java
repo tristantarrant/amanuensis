@@ -86,8 +86,8 @@ public class ExecutorContext {
 		if (writer != null)
 			return writer;
 		try {
-			if(IndexWriter.isLocked(directory)) {
-				log.warn("Unlocking index "+ AmanuensisManager.getUniqueDirectoryIdentifier(directory)+" probable, crash of coordinator");
+			if (IndexWriter.isLocked(directory)) {
+				log.warn("Unlocking index " + AmanuensisManager.getUniqueDirectoryIdentifier(directory) + " probable, crash of coordinator");
 				forceUnlock();
 			}
 			writer = new IndexWriter(directory, analyzer, MAX_FIELD_LENGTH);
@@ -103,8 +103,8 @@ public class ExecutorContext {
 		if (writer != null) {
 			try {
 				writer.commit();
-				if(log.isTraceEnabled()) {
-					log.trace("Committed writer for index "+AmanuensisManager.getUniqueDirectoryIdentifier(directory));	
+				if (log.isTraceEnabled()) {
+					log.trace("Committed writer for index " + AmanuensisManager.getUniqueDirectoryIdentifier(directory));
 				}
 			} catch (IOException e) {
 				throw new IndexerException("Error while committing writer for index " + AmanuensisManager.getUniqueDirectoryIdentifier(directory), e);
@@ -118,47 +118,45 @@ public class ExecutorContext {
 		if (w != null) {
 			try {
 				w.close();
-				if(log.isTraceEnabled()) {
-					log.debug("Closed writer for index "+AmanuensisManager.getUniqueDirectoryIdentifier(directory));
+				if (log.isTraceEnabled()) {
+					log.debug("Closed writer for index " + AmanuensisManager.getUniqueDirectoryIdentifier(directory));
 				}
 			} catch (IOException e) {
 				log.error("Error while closing writer for index " + AmanuensisManager.getUniqueDirectoryIdentifier(directory), e);
 			}
 		}
 	}
-	
+
 	public synchronized Status check(boolean fix) {
 		try {
 			forceUnlock();
 			CheckIndex checker = new CheckIndex(directory);
 			Status check = checker.checkIndex();
-			if(check.clean) {
-				log.info("Index "+AmanuensisManager.getUniqueDirectoryIdentifier(directory)+" is clean");
+			if (check.clean) {
+				log.info("Index " + AmanuensisManager.getUniqueDirectoryIdentifier(directory) + " is clean");
 			} else {
-				log.warn("Index "+AmanuensisManager.getUniqueDirectoryIdentifier(directory)+" is NOT clean, fixing...");
+				log.warn("Index " + AmanuensisManager.getUniqueDirectoryIdentifier(directory) + " is NOT clean, fixing...");
 				checker.fixIndex(check);
 			}
 			return check;
 		} catch (IOException e) {
-			log.error("",e);
+			log.error("", e);
 			return null;
 		}
 	}
 
 	public synchronized void forceUnlock() {
 		try {
-			try {
-				close();
-			} finally {				
-				IndexWriter.unlock(this.directory);
-			}
+			writer = null; // Throw away a potentially broken writer
+			IndexWriter.unlock(this.directory); // Remove locks, any broken segments are discarded
 		} catch (Exception e) {
 			log.warn("Error while unlocking writer for index " + AmanuensisManager.getUniqueDirectoryIdentifier(directory), e);
 		}
 	}
 
 	/**
-	 * Provide an implementation of {@link ThreadFactory} which gives sensible names to threads
+	 * Provide an implementation of {@link ThreadFactory} which gives sensible
+	 * names to threads
 	 * 
 	 * @author Tristan Tarrant
 	 * @author Sanne Grinovero
@@ -182,7 +180,8 @@ public class ExecutorContext {
 	}
 
 	/**
-	 * Provide an implementation of {@link RejectedExecutionHandler} which queues up threads
+	 * Provide an implementation of {@link RejectedExecutionHandler} which
+	 * queues up threads
 	 * 
 	 * @author Tristan Tarrant
 	 * @author Sanne Grinovero
