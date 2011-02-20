@@ -21,10 +21,13 @@
 
 package net.dataforte.infinispan.amanuensis.backend.lucene;
 
+import java.util.concurrent.Callable;
+
 import net.dataforte.commons.slf4j.LoggerFactory;
 import net.dataforte.infinispan.amanuensis.ExecutorContext;
 import net.dataforte.infinispan.amanuensis.IndexOperation;
 import net.dataforte.infinispan.amanuensis.IndexOperations;
+import net.dataforte.infinispan.amanuensis.IndexerException;
 import net.dataforte.infinispan.amanuensis.OperationExecutor;
 
 import org.apache.lucene.index.IndexWriter;
@@ -34,7 +37,7 @@ import org.slf4j.Logger;
  * 
  * @author Tristan Tarrant
  */
-public class DirectoryOperationQueueExecutor implements Runnable {
+public class DirectoryOperationQueueExecutor implements Callable<Void> {
 	private static final Logger log = LoggerFactory.make();
 
 	private ExecutorContext context;
@@ -44,12 +47,12 @@ public class DirectoryOperationQueueExecutor implements Runnable {
 		this.context = context;		
 		this.ops = ops;
 	}
-	
+
 
 	@Override
-	public void run() {
+	public Void call() throws Exception {
 		if (this.ops.getOperations().isEmpty()) {
-			return;
+			return null;
 		}
 		try {
 			// Obtain an index writer
@@ -62,13 +65,12 @@ public class DirectoryOperationQueueExecutor implements Runnable {
 			}
 			// Commit the changes
 			context.commit();
+			return null;
 		} catch (Throwable t) {
 			log.error("Error while processing queue for index "+ops.getIndexName()+", discarding writer and unlocking directory", t);
-			context.forceUnlock();
-			
-			// FIXME, we should retry the operation
+			context.forceUnlock();			
+			throw new IndexerException("Error while processing queue for index "+ops.getIndexName()+", discarding writer and unlocking directory");
 		}
-
 	}
 
 }

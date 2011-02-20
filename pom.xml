@@ -79,7 +79,7 @@
 		<dependency>
 			<groupId>net.dataforte</groupId>
 			<artifactId>dataforte-commons</artifactId>
-			<version>0.0.5</version>
+			<version>0.0.6</version>
 		</dependency>
 	</dependencies>
 </project>

@@ -66,7 +66,7 @@ public class ExecutorContext {
 		this.operationExecutorFactory = new LuceneOperationExecutorFactory();
 	}
 
-	public ExecutorService getExecutor() {
+	public ExecutorService getExecutor() {		
 		return executor;
 	}
 

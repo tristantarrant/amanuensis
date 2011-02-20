@@ -25,6 +25,7 @@ import java.util.concurrent.ExecutionException;
 
 import net.dataforte.commons.collections.Computable;
 import net.dataforte.commons.collections.Memoizer;
+import net.dataforte.commons.concurrent.RetryCallable;
 import net.dataforte.commons.slf4j.LoggerFactory;
 import net.dataforte.infinispan.amanuensis.AmanuensisManager;
 import net.dataforte.infinispan.amanuensis.ExecutorContext;
@@ -58,7 +59,7 @@ public class LuceneOperationDispatcher implements OperationDispatcher {
 		try {
 			ExecutorContext context = executorContexts.compute(ops.getIndexName());
 			DirectoryOperationQueueExecutor queueExecutor = new DirectoryOperationQueueExecutor(context, ops);
-			context.getExecutor().execute(queueExecutor);			
+			context.getExecutor().submit(new RetryCallable<Void>(queueExecutor, 3));			
 		} catch (Exception e) {
 			log.error("", e);
 		}
