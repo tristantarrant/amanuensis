@@ -59,7 +59,7 @@ public class LuceneOperationDispatcher implements OperationDispatcher {
 		try {
 			ExecutorContext context = executorContexts.compute(ops.getIndexName());
 			DirectoryOperationQueueExecutor queueExecutor = new DirectoryOperationQueueExecutor(context, ops);
-			context.getExecutor().submit(new RetryCallable<Void>(queueExecutor, 3));			
+			context.getExecutor().submit(new RetryCallable<Void>(queueExecutor, 10));			
 		} catch (Exception e) {
 			log.error("", e);
 		}
