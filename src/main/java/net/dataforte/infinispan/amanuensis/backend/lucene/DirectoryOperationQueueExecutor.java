@@ -34,6 +34,7 @@ import org.apache.lucene.index.IndexWriter;
 import org.slf4j.Logger;
 
 /**
+ * This class applies {@link IndexOperations} to a specific index (represented by an {@link ExecutorContext})
  * 
  * @author Tristan Tarrant
  */
@@ -51,6 +52,7 @@ public class DirectoryOperationQueueExecutor implements Callable<Void> {
 
 	@Override
 	public Void call() throws Exception {
+		// No operations, return immediately
 		if (this.ops.getOperations().isEmpty()) {
 			return null;
 		}
@@ -66,9 +68,10 @@ public class DirectoryOperationQueueExecutor implements Callable<Void> {
 			// Commit the changes
 			context.commit();
 			return null;
-		} catch (Throwable t) {
+		} catch (Throwable t) {			
+			// Something bad happened, discard the writer and try again		
 			log.error("Error while processing queue for index "+ops.getIndexName()+", discarding writer and unlocking directory", t);
-			context.forceUnlock();			
+			context.rollback();			
 			throw new IndexerException("Error while processing queue for index "+ops.getIndexName()+", discarding writer and unlocking directory");
 		}
 	}

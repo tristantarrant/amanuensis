@@ -36,6 +36,7 @@ import net.dataforte.infinispan.amanuensis.backend.lucene.LuceneOperationExecuto
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.index.CheckIndex;
 import org.apache.lucene.index.CheckIndex.Status;
+import org.apache.lucene.index.CorruptIndexException;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.store.Directory;
 import org.slf4j.Logger;
@@ -144,11 +145,26 @@ public class ExecutorContext {
 			return null;
 		}
 	}
+	
+	public synchronized void rollback() {
+		if(writer!=null) {
+			try {
+				writer.rollback();
+				writer.close(false);
+			} catch (Exception e) {
+				log.error("Error during rollback/close", e);
+			} finally {
+				writer = null;
+			}
+		}
+		forceUnlock();		
+	}
 
 	public synchronized void forceUnlock() {
-		try {
-			writer = null; // Throw away a potentially broken writer
-			IndexWriter.unlock(this.directory); // Remove locks, any broken segments are discarded
+		try {			
+			if(IndexWriter.isLocked(directory)) {
+				IndexWriter.unlock(this.directory); // Remove locks
+			}
 		} catch (Exception e) {
 			log.warn("Error while unlocking writer for index " + AmanuensisManager.getUniqueDirectoryIdentifier(directory), e);
 		}
@@ -198,4 +214,6 @@ public class ExecutorContext {
 			}
 		}
 	}
+
+	
 }
