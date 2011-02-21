@@ -36,7 +36,6 @@ import net.dataforte.infinispan.amanuensis.backend.lucene.LuceneOperationExecuto
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.index.CheckIndex;
 import org.apache.lucene.index.CheckIndex.Status;
-import org.apache.lucene.index.CorruptIndexException;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.store.Directory;
 import org.slf4j.Logger;
