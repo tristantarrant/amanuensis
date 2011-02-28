@@ -12,7 +12,7 @@
 
 	<properties>
 		<version.lucene>3.0.3</version.lucene>
-		<version.infinispan>4.2.0.FINAL</version.infinispan>
+		<version.infinispan>4.2.1.CR3</version.infinispan>
 		<version.slf4j>1.6.1</version.slf4j>
 	</properties>
 
