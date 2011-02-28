@@ -100,6 +100,22 @@ public class AmanuensisManager {
 		}
 	}
 
+	public OperationDispatcher getRemoteOperationDispatcher() {
+		return remoteOperationDispatcher;
+	}
+
+	public void setRemoteOperationDispatcher(OperationDispatcher remoteOperationDispatcher) {
+		this.remoteOperationDispatcher = remoteOperationDispatcher;
+	}
+
+	public LuceneOperationDispatcher getLocalOperationDispatcher() {
+		return localOperationDispatcher;
+	}
+
+	public void setLocalOperationDispatcher(LuceneOperationDispatcher localOperationDispatcher) {
+		this.localOperationDispatcher = localOperationDispatcher;
+	}
+
 	public WriterConfigurator getWriterConfigurator() {
 		return writerConfigurator;
 	}
