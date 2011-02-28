@@ -94,6 +94,15 @@ public class JGroupsOperationDispatcher implements OperationDispatcher {
 			public void run() {
 				Address dest = ((JGroupsAddress) manager.getMasterAddress()).getJGroupsAddress();
 				Address src = ((JGroupsAddress) manager.getLocalAddress()).getJGroupsAddress();
+				if(dest.equals(src)) {
+					try {
+						manager.dispatchOperations(ops);
+						executor.shutdown();
+						return;
+					} catch (IndexerException e) {
+						// Fall through
+					}					
+				}
 				Message message = new Message(dest, src, ops);
 				if (log.isTraceEnabled()) {
 					log.trace("Sending {} to {}", ops.toString(), dest.toString());
